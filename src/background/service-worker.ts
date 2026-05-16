@@ -11,7 +11,7 @@ import {
 } from '../lib/db';
 import { computeNextReview, initialReviewAt } from '../lib/scheduler';
 import { fetchTranscript, NoTranscriptError } from '../lib/transcript';
-import { generateQuestions } from '../lib/anthropic';
+import { generateQuestions } from '../lib/llm';
 import type {
   MCQ,
   RuntimeMessage,

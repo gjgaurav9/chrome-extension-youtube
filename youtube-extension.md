@@ -7,7 +7,7 @@ ReviseTube: Chrome MV3 extension that adds spaced-repetition review to YouTube. 
 Don't violate these without explicit consent:
 
 - **Service worker owns IndexedDB.** Content scripts run at the `youtube.com` origin; their IndexedDB is a separate store from the extension origin. All DB reads and writes go through `chrome.runtime.sendMessage` → `service-worker.ts`. Popup and options pages live at the extension origin and *could* call Dexie directly, but they currently also use messages for consistency.
-- **Anthropic SDK is service-worker-only.** Never import `@anthropic-ai/sdk` into a content script — that would expose the API key to `youtube.com` page context. The SDK runs with `dangerouslyAllowBrowser: true` inside the SW because the SW is a privileged extension context, not a page.
+- **OpenAI SDK is service-worker-only.** Never import `openai` into a content script — that would expose the API key to `youtube.com` page context. The SDK runs with `dangerouslyAllowBrowser: true` inside the SW because the SW is a privileged extension context, not a page.
 - **Service worker has no in-memory state.** MV3 service workers are killed aggressively. IndexedDB and `chrome.storage.local` are the only sources of truth. Don't add module-level mutable state to `background/service-worker.ts`.
 - **Shadow DOM for any non-trivial DOM injected into pages.** The "Add to Revision" button and the home-page card are plain DOM with inline styles (small, no Tailwind). The review modal is React + Tailwind inside a shadow root, with `globals.css?inline` injected as a `<style>` and a `:host { all: initial }` reset (see `review-modal.tsx`).
 
@@ -27,7 +27,7 @@ src/
 │   ├── db.ts                        # Dexie schema (videos, questions) + helpers
 │   ├── scheduler.ts                 # SM-2-lite. INTERVALS_DAYS = [1, 3, 7, 21, 60]
 │   ├── transcript.ts                # Watch-page HTML → ytInitialPlayerResponse → captionTracks → XML parse
-│   ├── anthropic.ts                 # generateQuestions() with one retry; strict JSON validation
+│   ├── llm.ts                       # generateQuestions() — OpenAI gpt-4o-mini + Structured Outputs (strict JSON schema)
 │   ├── copy.ts                      # ALL user-facing strings
 │   ├── messaging.ts                 # typed `send<T>()` wrapper for chrome.runtime.sendMessage
 │   └── debug.ts                     # debug() helper gated by const DEBUG
@@ -65,7 +65,7 @@ Question cache TTL: 30 days. `removeVideo` also wipes the question cache for tha
 - **SPA navigation.** YouTube doesn't full-page-reload between watch/home/feed. Content scripts re-inject via the `yt-navigate-finish` event + a 500ms-interval poll capped at 10s. A `MutationObserver` on `document.body` was considered and rejected — too expensive on YouTube's busy DOM.
 - **YouTube selectors change.** `#top-level-buttons-computed`, `ytd-rich-grid-renderer`, `h1.ytd-watch-metadata yt-formatted-string` are current as of build date. If injection silently fails after a YouTube redesign, suspect these first.
 - **Transcript availability.** Some videos have no captions; others only have ASR (auto-generated). `pickEnglishTrack` prefers manual over ASR. `NoTranscriptError` becomes `ERR_NO_TRANSCRIPT` over the message channel; the review modal handles this by removing the video from the queue.
-- **Markdown fences from the model.** Models occasionally wrap JSON in ` ```json ` fences despite the system-prompt rule. `stripFences` is defensive. On parse or validation failure, one retry at `temperature: 0.2`.
+- **Structured Outputs.** `lib/llm.ts` uses OpenAI's `response_format: { type: 'json_schema', strict: true }`, which makes the model emit JSON matching `QUESTIONS_SCHEMA` exactly. No fences, no extra fields. If you ever swap provider/model, restore the strip-fences-and-retry path from git history (was `lib/anthropic.ts`) — without strict schemas, parse failures will recur.
 - **Service worker death mid-fetch.** A long transcript fetch + LLM call can outlive the SW's idle timeout. The messaging wrapper surfaces "No response from service worker"; the modal shows a generic error and the user can retry.
 - **`noUncheckedIndexedAccess`.** `arr[i]` is `T | undefined`. A few `!` non-null assertions live where bounds are checked just above (e.g. `scheduler.ts`, `transcript.ts`). Don't remove without restructuring.
 - **API key path.** `chrome.storage.local` only. Never log it. Options page is the only writer; SW reads on-demand at question-generation time.

@@ -19,7 +19,7 @@ export const copy = {
   modalNoTranscript:
     "This video has no transcript — can't generate questions. Removing from queue.",
   modalNoApiKey:
-    'No API key set. Open the extension options and add your Anthropic API key.',
+    'No API key set. Open the extension options and add your OpenAI API key.',
   modalScore: (correct: number, total: number): string => `${correct}/${total}`,
   modalNextReview: (date: Date): string =>
     `Next review on ${date.toLocaleDateString(undefined, { dateStyle: 'medium' })}`,
@@ -27,8 +27,8 @@ export const copy = {
   modalRemaining: (n: number): string => `${n} to go`,
 
   optionsTitle: 'ReviseTube settings',
-  optionsApiKeyLabel: 'Anthropic API key',
-  optionsApiKeyPlaceholder: 'sk-ant-…',
+  optionsApiKeyLabel: 'OpenAI API key',
+  optionsApiKeyPlaceholder: 'sk-…',
   optionsApiKeySave: 'Save key',
   optionsApiKeySaved: 'Saved',
   optionsApiKeyHelp:

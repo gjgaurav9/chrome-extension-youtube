@@ -6,8 +6,8 @@ Run after every meaningful change. There is no automated test suite for the MVP 
 
 1. `pnpm build` (or `pnpm dev`)
 2. Load `dist/` in `chrome://extensions` (Developer mode → Load unpacked)
-3. Open the extension's Options page and paste a valid Anthropic API key (`sk-ant-…`)
-4. Confirm the masked key appears as "Stored: sk-ant-… ABCD"
+3. Open the extension's Options page and paste a valid OpenAI API key (`sk-…`)
+4. Confirm the masked key appears as "Stored: sk-… ABCD"
 
 ## Core flow
 

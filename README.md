@@ -16,7 +16,7 @@ Load the extension in Chrome:
 3. Click **Load unpacked**
 4. Select the `dist/` directory
 
-Right-click the extension icon → **Options** → paste your Anthropic API key. Question generation uses Claude Haiku 4.5; cost is roughly $0.001–$0.005 per review session.
+Right-click the extension icon → **Options** → paste your OpenAI API key. Question generation uses `gpt-4o-mini` with Structured Outputs; cost is roughly $0.0005–$0.002 per review session.
 
 ## Develop
 
@@ -36,4 +36,4 @@ See `TESTING.md` for the manual test checklist, `ROADMAP.md` for explicitly-defe
 
 ## Stack
 
-Manifest V3 · Vite + `@crxjs/vite-plugin` · React 18 · TypeScript (strict) · Dexie · Zustand · Tailwind (in shadow DOM) · `@anthropic-ai/sdk`.
+Manifest V3 · Vite + `@crxjs/vite-plugin` · React 18 · TypeScript (strict) · Dexie · Zustand · Tailwind (in shadow DOM) · `openai` SDK.
